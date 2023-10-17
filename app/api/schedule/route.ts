@@ -14,9 +14,10 @@ const qstashClient = new Client({
 
 export async function POST(request: Request) {
   const body: RequestBody = await request.json();
+  const host = request.headers.get("host");
 
   const qstashResponse = await qstashClient.publishJSON({
-    url: `https://`, // ai route
+    url: `https://${host}/api/ai`,
     body: body,
     notBefore: body?.timestamp,
   });

@@ -27,6 +27,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.47.0",
     "replicate": "^0.20.1",
+    "resend": "^1.1.0",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.22.4"
