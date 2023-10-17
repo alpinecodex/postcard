@@ -2,12 +2,6 @@
 
 type TimeKey = "morning" | "afternoon" | "evening";
 
-const timeMapping: Record<TimeKey, number> = {
-  morning: 9,
-  afternoon: 12,
-  evening: 18,
-};
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -68,11 +62,12 @@ export default function MainForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const timeMapping = {
+    const timeMapping: Record<TimeKey, number> = {
       morning: 9,
       afternoon: 12,
       evening: 18,
     };
+
     const hour = timeMapping[values.time as TimeKey];
 
     const date = new Date(values.date);
