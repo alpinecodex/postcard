@@ -77,7 +77,22 @@ export default function MainForm() {
 
     const combinedValues = { ...values, timestamp };
 
-    console.log(combinedValues);
+    const response = await fetch("/api/schedule", {
+      method: "POST",
+      body: JSON.stringify(combinedValues),
+    });
+
+    if (response.status === 200) {
+      toast({
+        title: "Success",
+        description: "Postcard succesfully scheduled.",
+      });
+    } else {
+      toast({
+        title: "Uh oh...",
+        description: "Something went wrong...",
+      });
+    }
   };
 
   return (

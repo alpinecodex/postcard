@@ -11,6 +11,7 @@ import { EmailTemplate } from "@/components/email";
 
 export async function POST(request: Request) {
   const body: Prediction = await request.json();
+  console.log("body: ", body);
   const postcard = (await redis?.hgetall(body?.id)) as Postcard;
 
   const data = await resend.emails.send({
