@@ -73,9 +73,10 @@ export default function MainForm() {
     const date = new Date(values.date);
     date.setHours(hour, 0, 0, 0);
 
-    const timestamp = date.getTime();
+    const timestamp = date.getTime() / 1000;
 
     const combinedValues = { ...values, timestamp };
+    console.log(combinedValues);
 
     const response = await fetch("/api/schedule", {
       method: "POST",
