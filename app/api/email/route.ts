@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     subject: "AI POSTCARD!!!",
     react: EmailTemplate({
       message: postcard?.message,
-      image: body?.output,
+      image: body?.output[0],
     }) as React.ReactElement,
   });
   console.log(postcard);
