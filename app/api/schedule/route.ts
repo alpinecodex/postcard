@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const body: RequestBody = await request.json();
 
   const qstashResponse = await qstashClient.publishJSON({
-    url: `https://`, // ai model
+    url: `https://`, // ai route
     body: body,
     notBefore: body?.timestamp,
   });

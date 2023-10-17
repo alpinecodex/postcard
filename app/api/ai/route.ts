@@ -1,5 +1,13 @@
+type RequestBody = {
+  email: string;
+  prompt: string;
+  message: string;
+  timestamp: number;
+};
+
 import { NextResponse } from "next/server";
 import Replicate from "replicate";
+import redis from "@/lib/redis";
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN || "",
@@ -7,12 +15,12 @@ const replicate = new Replicate({
 
 export async function POST(request: Request) {
   try {
-    const { prompt } = await request.json();
+    const body: RequestBody = await request.json();
     const output = await replicate.predictions.create({
       version:
         "563a66acc0b39e5308e8372bed42504731b7fec3bc21f2fcbea413398690f3ec",
       input: {
-        prompt: "In the style of HISGH. " + prompt,
+        prompt: "In the style of HISGH. " + body.prompt,
         negative_prompt:
           "Gothic, Medieval, Abstract, Futuristic, Rustic, Victorian, Graffiti, Fantasy, Horror, Industrial, Cubism, Impressionism, Surrealism, Baroque, Renaissance, Expressionism, Pop-art, Dystopian, Steampunk, Cyberpunk, Ugly, Bad proportion, Distorted, Cluttered, Chaotic, Mismatched, Overcrowded, Imbalanced, Inharmonious, Disproportionate, Unpleasant, Grungy, Messy, Unrefined, Crude, Grotesque, Disarray, Jumbled, Haphazard, Unsymmetrical",
         width: 1024,
@@ -27,10 +35,13 @@ export async function POST(request: Request) {
         apply_watermark: true,
         lora_scale: 0.6,
       },
-      webhook: "https://example.com/your-webhook",
+      webhook: "http://localhost:3000/api/email",
     });
 
     console.log("output: ", output);
+    console.log(output?.id);
+
+    await redis!.hset(output?.id, body);
 
     return NextResponse.json(output);
   } catch (error) {
