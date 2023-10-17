@@ -1,8 +1,25 @@
 "use client";
 
+type TimeKey = "morning" | "afternoon" | "evening";
+
+const timeMapping: Record<TimeKey, number> = {
+  morning: 9,
+  afternoon: 12,
+  evening: 18,
+};
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -20,10 +37,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "./ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 const formSchema = z.object({
   email: z.string().email({ message: "Enter a valid email." }),
   prompt: z.string().nonempty({ message: "Required" }),
   message: z.string().nonempty({ message: "Required" }),
+  date: z.date({ required_error: "Required" }),
+  time: z.string().nonempty({ message: "Required" }),
 });
 
 export default function MainForm() {
@@ -35,28 +62,27 @@ export default function MainForm() {
       email: "",
       prompt: "",
       message: "",
+      date: new Date(),
+      time: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const response = await fetch("/api/property", {
-      method: "POST",
-      body: JSON.stringify(values),
-    });
-    if (response.status === 200) {
-      toast({
-        title: "Successfully Created",
-        description: "We will send you an email once your report runs!",
-      });
-    } else {
-      toast({
-        title: "An Error Occurred",
-        description: "Please try again later or reach out to support.",
-      });
-    }
-    const data = await response.json();
-    // router.push("/property");
-    setTimeout(() => window.location.assign("/property"), 2000);
+    const timeMapping = {
+      morning: 9,
+      afternoon: 12,
+      evening: 18,
+    };
+    const hour = timeMapping[values.time as TimeKey];
+
+    const date = new Date(values.date);
+    date.setHours(hour, 0, 0, 0);
+
+    const timestamp = date.getTime();
+
+    const combinedValues = { ...values, timestamp };
+
+    console.log(combinedValues);
   };
 
   return (
@@ -112,6 +138,82 @@ export default function MainForm() {
                 </FormControl>
                 <FormDescription>
                   Prompt for the postcard image.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Date to Send</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const nextWeek = new Date();
+                        nextWeek.setDate(today.getDate() + 7);
+                        return date > nextWeek || date < today;
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  Pick a date to send the postcard.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="time"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Time of Day</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Time of day" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="morning">Morning</SelectItem>
+                      <SelectItem value="afternoon">Afternoon</SelectItem>
+                      <SelectItem value="evening">Evening</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormDescription>
+                  Time of day to send the postcard.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
