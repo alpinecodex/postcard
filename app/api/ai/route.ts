@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         apply_watermark: true,
         lora_scale: 0.6,
       },
-      webhook: "https://postcard-jet.vercel.app/api/email",
+      webhook: `${process.env.APP_DOMAIN}api/email`,
     });
 
     console.log("output: ", output);
